@@ -620,13 +620,15 @@ class MetricsPanel(tk.Frame):
         style.configure("Dark.Treeview.Heading",
                          background=BG_HEADER, foreground=ACCENT_BLUE,
                          font=("Courier", 9, "bold"), relief="flat")
-        style.map("Dark.Treeview", background=[("selected", "#264f78")])
+        style.map("Dark.Treeview",
+                  background=[("selected", "#264f78")],
+                  foreground=[("selected", "#ffffff")])
 
         frame = tk.Frame(self, bg=BG_PANEL)
-        frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=(4, 8))
+        frame.pack(fill=tk.X, expand=False, padx=8, pady=(4, 4))
 
         self.tree = ttk.Treeview(frame, columns=self.COLUMNS, show="headings",
-                                  style="Dark.Treeview", height=5)
+                                  style="Dark.Treeview", height=4)
         for col, width in zip(self.COLUMNS, [145, 110, 115, 110, 175]):
             self.tree.heading(col, text=col)
             self.tree.column(col, width=width, anchor="center")
@@ -646,7 +648,7 @@ class MetricsPanel(tk.Frame):
 
         self.analysis_box = tk.Text(
             self, bg=BG_DARK, fg=TEXT_MAIN, font=("Courier", 8),
-            relief="flat", wrap=tk.WORD, height=4, state=tk.DISABLED,
+            relief="flat", wrap=tk.WORD, height=6, state=tk.DISABLED,
             padx=8, pady=6, insertbackground=TEXT_MAIN, selectbackground="#264f78",
         )
         self.analysis_box.pack(fill=tk.X, padx=8, pady=(0, 8))
@@ -710,7 +712,9 @@ class MetricsPanel(tk.Frame):
             "Request-Response": ACCENT_BLUE, "Publish-Subscribe": ACCENT_GREEN,
             "Message Passing":  ACCENT_AMBER, "RPC": ACCENT_PURPLE,
         }
-        for m in ["Request-Response", "Publish-Subscribe", "Message Passing", "RPC"]:
+        row_bg_even = "#131921"
+        row_bg_odd  = "#0d1117"
+        for idx, m in enumerate(["Request-Response", "Publish-Subscribe", "Message Passing", "RPC"]):
             if m in self._data:
                 d   = self._data[m]
                 tag = m.replace(" ", "_").replace("-", "_")
@@ -718,7 +722,9 @@ class MetricsPanel(tk.Frame):
                     m, d.get("messages","-"), d.get("latency","-"),
                     d.get("time","-"), d.get("pattern","-"),
                 ), tags=(tag,))
-                self.tree.tag_configure(tag, foreground=colors_tag.get(m, TEXT_MAIN))
+                self.tree.tag_configure(tag,
+                    foreground=colors_tag.get(m, TEXT_MAIN),
+                    background=row_bg_even if idx % 2 == 0 else row_bg_odd)
 
         self.analysis_box.config(state=tk.NORMAL)
         self.analysis_box.delete("1.0", tk.END)
@@ -890,7 +896,7 @@ class DistributedSimApp(tk.Tk):
         self.log_box = scrolledtext.ScrolledText(
             log_frame, bg=BG_DARK, fg=TEXT_MAIN, font=("Courier", 9),
             insertbackground=TEXT_MAIN, selectbackground="#264f78",
-            relief="flat", wrap=tk.WORD, state=tk.DISABLED,
+            relief="flat", wrap=tk.WORD, state=tk.DISABLED, height=12,
         )
         self.log_box.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
         for tag, col in [("blue", ACCENT_BLUE), ("green", ACCENT_GREEN), ("amber", ACCENT_AMBER),
@@ -899,7 +905,7 @@ class DistributedSimApp(tk.Tk):
             self.log_box.tag_configure(tag, foreground=col)
 
         self.metrics = MetricsPanel(center)
-        self.metrics.pack(fill=tk.X, pady=(0, 4))
+        self.metrics.pack(fill=tk.BOTH, expand=False, pady=(0, 4))
         self.after(200, lambda: self.canvas.draw_model(self.model_var.get()))
 
     # --- Event handlers ---
